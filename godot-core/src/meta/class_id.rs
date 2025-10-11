@@ -309,8 +309,13 @@ impl ClassIdCache {
     }
 
     fn clear(&mut self) {
-        self.entries.clear();
+        // Don't clear entries - ClassId objects with old indices may still exist and need to access them.
+        // This is especially important during hot reload where static ClassIds persist.
+        // We only clear the lookup maps to allow re-registration.
         self.type_to_index.clear();
         self.string_to_index.clear();
+
+        // Re-populate the string cache with index 0 (empty string).
+        self.string_to_index.insert(String::new(), 0);
     }
 }
